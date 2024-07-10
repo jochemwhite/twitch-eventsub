@@ -19,7 +19,7 @@ import {EventsubAPI} from "../src/classes/twitch-eventsub"
 
 const eventsub = new EventSubSocket({
   connect: true,
-  url: "ws://127.0.0.1:8080/ws",
+  // url: "ws://127.0.0.1:8080/ws",
 });
 
 
