@@ -1,0 +1,9 @@
+version: "3"
+services:
+  server:
+    container_name: sr.jochemwhite-backend
+    build: .
+    environment:
+      - test=test
+    env_file:
+      - ./.env
