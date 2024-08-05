@@ -1,6 +1,6 @@
 import { HandleChatMessage } from "@/event-handlers/channel-chat-message";
 import { EventsubAPI } from "./twitch-eventsub";
-import type { EventSubNotification, EventSubNotificationPayload, TwitchEvent } from "@/types/eventsub";
+import type { ChatMessageEvent, EventSubNotification, EventSubNotificationPayload, TwitchEvent } from "@/types/eventsub";
 import { sendDiscordMessage } from "@/axios/discord-webhook";
 import { supabase } from "@/lib/supabase";
 import handleWorkflow from "@/functions/handle-workflow";
@@ -217,6 +217,10 @@ class EventSubSocket {
   }
 
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
+
+    if (event.subscription.type === "channel.chat.message") {
+      await HandleChatMessage(event.event as ChatMessageEvent);
+    }
 
     
     await handleWorkflow({ event });
