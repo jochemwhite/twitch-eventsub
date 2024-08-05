@@ -12,7 +12,7 @@ export type CustomRewardRequest = {
   is_global_cooldown_enabled?: boolean; // A Boolean value that determines whether to apply a cooldown period between redemptions (see the global_cooldown_seconds field for the duration of the cooldown period). The default is false.
   global_cooldown_seconds?: number; // The cooldown period, in seconds. Applied only if the is_global_cooldown_enabled field is true. The minimum value is 1; however, the minimum value is 60 for it to be shown in the Twitch UX.
   should_redemptions_skip_request_queue?: boolean; // A Boolean value that determines whether redemptions should be set to FULFILLED status immediately when a reward is redeemed. If false, status is set to UNFULFILLED and follows the normal request queue process. The default is false.
-  function: string; // The function to be called when the reward is redeemed. This is a string that will be parsed as a function. It is limited to 400 characters.
+  function?: string; // The function to be called when the reward is redeemed. This is a string that will be parsed as a function. It is limited to 400 characters.
 };
 
 export type CustomRewardResponse = {

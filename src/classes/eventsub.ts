@@ -1,7 +1,11 @@
 import { HandleChatMessage } from "@/event-handlers/channel-chat-message";
 import { EventsubAPI } from "./twitch-eventsub";
-import type { TwitchEvent } from "@/types/eventsub";
+import type { EventSubNotification, EventSubNotificationPayload, TwitchEvent } from "@/types/eventsub";
 import { sendDiscordMessage } from "@/axios/discord-webhook";
+import { supabase } from "@/lib/supabase";
+import handleWorkflow from "@/functions/handle-workflow";
+import actionHandlers from "@/functions/handle-workflow";
+import type { Action, EditorNodeType, Metadata } from "@/types/workflow";
 
 type CloseCodeMap = {
   [code: number]: string;
@@ -36,11 +40,6 @@ class EventSubSocket {
 
   private silenceReconnect: boolean;
   private disableAutoReconnect: boolean;
-
-  private eventHandlers: { [key: string]: (event: any) => void } = {
-    "channel.chat.message": HandleChatMessage,
-    // Add more event mappings
-  };
 
   constructor({ url = "wss://eventsub.wss.twitch.tv/ws", connect = false, silenceReconnect = true, disableAutoReconnect = false }: EventSubOptions) {
     this.silenceReconnect = silenceReconnect;
@@ -102,7 +101,7 @@ class EventSubSocket {
     };
 
     this.eventsub.onmessage = async (message) => {
-      const messageData = JSON.parse(message.data.toString());
+      const messageData: EventSubNotification = JSON.parse(message.data.toString());
 
       const { metadata, payload } = messageData;
       const { message_id, message_type, message_timestamp } = metadata;
@@ -172,7 +171,7 @@ class EventSubSocket {
           sendDiscordMessage(`${this.eventsub?.url}/${this.counter} Reconnect request ${reconnect_url}`);
 
           // this.emit("session_reconnect", reconnect_url);
-          this.connect(reconnect_url, true);
+          this.connect(reconnect_url!, true);
           break;
         case "websocket_disconnect":
           console.debug(`${this.counter} Recv Disconnect`);
@@ -217,13 +216,11 @@ class EventSubSocket {
     }, this.silenceTime * 1000);
   }
 
-  private dispatchEvent(event: any): void {
-    const handler = this.eventHandlers[event.subscription.type];
-    if (handler) {
-      handler(event.event);
-    } else {
-      console.warn(`No handler for event type: ${event.type}`);
-    }
+  private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
+
+    
+    await handleWorkflow({ event });
+      
   }
 
   private emit(event: string, ...args: any[]): void {

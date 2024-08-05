@@ -13,12 +13,13 @@ const TwitchAPI = axios.create({
 TwitchAPI.interceptors.request.use(
   async (config) => {
     // Assuming you have a method to get the current token...]
-    const user_id = config.user_id;
+    const user_id = config.broadcasterID;
+
     if (!user_id) {
       throw new Error("User ID is missing");
     }
 
-    const {data} = await supabase.from("twitch_integration").select("*").eq("user_id", user_id).single();
+    const {data} = await supabase.from("twitch_integration").select("*").eq("broadcaster_id", user_id).single();
     if (data?.access_token) {
 
       config.headers["Authorization"] = `Bearer ${data.access_token}`;
@@ -40,7 +41,7 @@ TwitchAPI.interceptors.response.use(
   },
   //handle response error
   async function (error) {
-    //originalRequest
+    // originalRequest
     const originalRequest = error.config;
 
     //if the error status = 401 we update the token and retry

@@ -11,5 +11,6 @@ declare module "bun" {
 declare module "axios" {
   export interface AxiosRequestConfig {
     user_id?: string;
+    broadcasterID?: number;
   }
 }

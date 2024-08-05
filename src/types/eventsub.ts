@@ -72,7 +72,7 @@ export type WebSocketMessage =
   | { metadata: Metadata; payload: CloseMessagePayload };
 
 export type EventSubNotification = {
-  Object: {
+  metadata: {
     message_id: string;
     message_type: string;
     message_timestamp: string;
@@ -80,6 +80,14 @@ export type EventSubNotification = {
     subscription_version: string;
   };
   payload: {
+    session: {
+      id: string;
+      status: string;
+      keepalive_timeout_seconds: number;
+      reconnect_url: string | null;
+      connected_at: string;
+    };
+
     subscription: {
       id: string;
       status: string;
@@ -102,6 +110,37 @@ export type EventSubNotification = {
       // For example, if subscribing to broadcaster's new follower, it might contain follower's information
       [key: string]: any; // You might need to define a more specific type based on your subscription types
     };
+  };
+};
+
+export type EventSubNotificationPayload = {
+  session: {
+    id: string;
+    status: string;
+    keepalive_timeout_seconds: number;
+    reconnect_url: string | null;
+    connected_at: string;
+  };
+
+  subscription: {
+    id: string;
+    status: string;
+    type: string;
+    version: string;
+    cost: number;
+    condition: {
+      // The condition object structure depends on the specific subscription type
+      // For example, if subscribing to broadcaster's new follower, it might contain broadcaster's ID
+      [key: string]: any; // You might need to define a more specific type based on your subscription types
+    };
+    transport: {
+      method: string;
+      session_id: string;
+    };
+    created_at: string;
+  };
+  event: {
+    [key: string]: any;
   };
 };
 
