@@ -37,7 +37,7 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
 
   if (error) {
     if (error.code === "PGRST116") {
-      console.log(`No workflow found for ${event.subscription.type} with event_id ${event_id}`);
+      // console.log(`No workflow found for ${event.subscription.type} with event_id ${event_id}`);
       return;
     }
 

@@ -222,6 +222,9 @@ class EventSubSocket {
       await HandleChatMessage(event.event as ChatMessageEvent);
     }
 
+
+
+
     
     await handleWorkflow({ event });
       
