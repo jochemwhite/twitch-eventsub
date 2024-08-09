@@ -35,6 +35,9 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     .or(eventFilter)
     .single();
 
+    // TODO: Handle the same triggers with different workflows
+    // REF: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
+
   if (error) {
     if (error.code === "PGRST116") {
       // console.log(`No workflow found for ${event.subscription.type} with event_id ${event_id}`);
