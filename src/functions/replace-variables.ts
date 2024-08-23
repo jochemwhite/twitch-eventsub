@@ -1,5 +1,5 @@
 import type { Metadata } from "@/types/workflow";
-const regex = /\${(.*)}/;
+const regex = /\{(.*)}/;
 
 export function replaceWords(input: { word: string, variable: boolean }[], rewards: Metadata): string[] {
   return input.map(obj => {

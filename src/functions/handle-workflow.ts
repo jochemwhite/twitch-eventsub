@@ -15,16 +15,13 @@ interface Workflow {
 }
 
 export default async function HandleWorkflow({ event }: Event): Promise<void> {
-  let event_id: string | null = null;
 
-  // check if the event is a chat message
-  if (event.subscription.type === "channel.chat.message") {
-    return;
-  }
+  let event_id: string | null = null;
 
   if (event.event.reward) {
     event_id = event.event.reward.id;
   }
+
 
   const eventFilter = event_id ? `event_id.eq.${event_id}` : "event_id.is.null";
 
@@ -35,8 +32,8 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     .or(eventFilter)
     .single();
 
-    // TODO: Handle the same triggers with different workflows
-    // REF: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
+  // TODO: Handle the same triggers with different workflows
+  // REF: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
 
   if (error) {
     if (error.code === "PGRST116") {

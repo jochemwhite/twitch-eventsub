@@ -1,11 +1,8 @@
-import { HandleChatMessage } from "@/event-handlers/channel-chat-message";
-import { EventsubAPI } from "./twitch-eventsub";
-import type { ChatMessageEvent, EventSubNotification, EventSubNotificationPayload, TwitchEvent } from "@/types/eventsub";
 import { sendDiscordMessage } from "@/axios/discord-webhook";
 import { supabase } from "@/lib/supabase";
-import handleWorkflow from "@/functions/handle-workflow";
-import actionHandlers from "@/functions/handle-workflow";
-import type { Action, EditorNodeType, Metadata } from "@/types/workflow";
+import type { ChatMessageEvent, EventSubNotification, EventSubNotificationPayload } from "@/types/eventsub";
+import { EventsubAPI } from "./twitch-eventsub";
+import HandleWorkflow from "@/functions/handle-workflow";
 
 type CloseCodeMap = {
   [code: number]: string;
@@ -217,17 +214,12 @@ class EventSubSocket {
   }
 
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
-
-    if (event.subscription.type === "channel.chat.message") {
-      await HandleChatMessage(event.event as ChatMessageEvent);
+    if (event.subscription.type === "channel.channel_points_custom_reward_redemption.add") {
+      const { broadcaster_user_name, reward, user_name, user_id, user_login } = event.event;
+      console.log(`[${broadcaster_user_name}] ${user_name} redeemed ${reward.title}`);
     }
 
-
-
-
-    
-    await handleWorkflow({ event });
-      
+    await HandleWorkflow({ event });
   }
 
   private emit(event: string, ...args: any[]): void {
