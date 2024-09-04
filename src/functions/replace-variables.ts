@@ -6,7 +6,7 @@ export function replaceWords(input: { word: string, variable: boolean }[], rewar
     if (obj.variable) {
       const match = obj.word.match(regex);
       if (match) {
-        const path = match[1].split(".");
+        const path = match[1].split(":");
         let value: any = rewards;
         for (const key of path) {
           value = value[key];

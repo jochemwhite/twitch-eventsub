@@ -15,13 +15,11 @@ interface Workflow {
 }
 
 export default async function HandleWorkflow({ event }: Event): Promise<void> {
-
   let event_id: string | null = null;
 
   if (event.event.reward) {
     event_id = event.event.reward.id;
   }
-
 
   const eventFilter = event_id ? `event_id.eq.${event_id}` : "event_id.is.null";
 
@@ -53,8 +51,6 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
 
   const trigger_id = workflow[0].data.id;
 
-  console.log(`Trigger ID: ${trigger_id}`);
-
   responseData[trigger_id] = event.event;
 
   // remove everything that in the node except the data object
@@ -80,6 +76,8 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
         responseData[action.id] = response;
       }
     } catch (error: any) {
+      console.log(error);
+
       await twitchChat.sendMessage({
         broadcaster_id: event.event.broadcaster_user_id,
         // @ts-ignore

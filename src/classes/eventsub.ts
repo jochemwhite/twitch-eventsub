@@ -219,6 +219,8 @@ class EventSubSocket {
       console.log(`[${broadcaster_user_name}] ${user_name} redeemed ${reward.title}`);
     }
 
+    console.debug(`Event dispatched: ${event.subscription.type}`);
+
     await HandleWorkflow({ event });
   }
 
