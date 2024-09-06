@@ -1,13 +1,9 @@
 import { ChannelPointsAPI } from "@/classes/twitch/twitch-channelpoints";
 import type { EventSubNotificationPayload } from "@/types/eventsub";
 import type { CustomRewardRequest } from "@/types/twitchAPI";
-import type { Metadata } from "@/types/workflow";
+import type { ActionsParams, Metadata } from "@/types/workflow";
 
-type ActionsParams = {
-  eventDetails: EventSubNotificationPayload;
-  metaData?: Metadata;
-  prevResponses?: Metadata;
-};
+
 
 export default async function updateCustomReward({ metaData, prevResponses, eventDetails }: ActionsParams): Promise<unknown> {
   const { event } = eventDetails;

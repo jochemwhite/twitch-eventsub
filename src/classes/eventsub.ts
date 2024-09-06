@@ -214,13 +214,6 @@ class EventSubSocket {
   }
 
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
-    if (event.subscription.type === "channel.channel_points_custom_reward_redemption.add") {
-      const { broadcaster_user_name, reward, user_name, user_id, user_login } = event.event;
-      console.log(`[${broadcaster_user_name}] ${user_name} redeemed ${reward.title}`);
-    }
-
-    console.debug(`Event dispatched: ${event.subscription.type}`);
-
     await HandleWorkflow({ event });
   }
 

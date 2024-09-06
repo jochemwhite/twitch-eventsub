@@ -78,11 +78,7 @@ class twitchChannel extends twitch {
     }
   }
 
-
-
-
-
-  // check if a channel is live 
+  // check if a channel is live
   async getStream(broadcaster_id: string, user_id: string) {
     try {
       const res = await TwitchAPI.get(`/streams`, {
@@ -96,6 +92,17 @@ class twitchChannel extends twitch {
       console.log(error);
       throw error;
     }
+  }
+
+  // Get Ad Schedule
+  async get_ad_schedule(broadcaster_id: string) {
+    const res = await TwitchAPI.get("/channels/ads", {
+      params: {
+        broadcaster_id,
+      },
+      broadcasterID: +broadcaster_id,
+    });
+    return res.data;
   }
 }
 

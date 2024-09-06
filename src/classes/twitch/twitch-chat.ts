@@ -181,10 +181,10 @@ class TwitchChat {
       await TwitchAPI.post(`/chat/announcements`, announcement, {
         params: {
           broadcaster_id,
-          moderator_id: this.bot_id,
+          moderator_id: broadcaster_id,
         },
         // get the accessToken from the moderator
-        broadcasterID: this.bot_id,
+        broadcasterID: +broadcaster_id,
       });
     } catch (error) {
       console.log(error);

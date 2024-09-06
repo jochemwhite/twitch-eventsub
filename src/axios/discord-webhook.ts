@@ -32,7 +32,7 @@ export async function sendDiscordMessage(content: string): Promise<void> {
   axios
     .post(webhookUrl, message)
     .then((response) => {
-      console.log("Message sent: ", response.data);
+      // console.log("Message sent: ", response.data);
     })
     .catch((error) => {
       console.error("Error sending message: ", error);

@@ -1,3 +1,4 @@
+import type { EventSubNotificationPayload } from "./eventsub";
 
 type TwitchTriggersTypes = "channel.channel_points_custom_reward_redemption.add";
 type TwitchActionsTypes = "custom_reward_update" | "send_chat_message";
@@ -60,4 +61,10 @@ export type Action = {
   type: Actions;
   nodeType: NodeTypes;
   metaData?: Metadata;
+};
+
+export type ActionsParams = {
+  eventDetails: EventSubNotificationPayload;
+  metaData?: Metadata;
+  prevResponses?: Metadata;
 };

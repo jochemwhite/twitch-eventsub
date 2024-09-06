@@ -10,11 +10,8 @@ import { handleVariable } from "./handle-variable";
 export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
   const { chatter_user_name, broadcaster_user_name, message, message_id, broadcaster_user_id, chatter_user_id, chatter_user_login } = chatMessage;
 
-  console.log(`[${broadcaster_user_name}] ${chatter_user_name}: ${message.text}`);
-
-  // get all the channelpoints 
+  // get all the channelpoints
   const channelpoints = await ChannelPointsAPI.getCustomRewards(+broadcaster_user_id);
-
 
   // parse the message
   const parsedMessage: string[] = message.text.split(" ");
@@ -45,10 +42,8 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
       messageToSend = `@${chatter_user_login} you do not have permission to use this command.`;
     }
 
-
     // check if the command has variables
     let variableObjectArray = checkVariable(messageToSend);
-
 
     // handle the variables
     const newArray = await Promise.all(
@@ -72,7 +67,7 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
 
     messageToSend = newArray.join(" ");
 
-    if(messageToSend === "") return;
+    if (messageToSend === "") return;
 
     // send the message
     await twitchChat.sendMessage({

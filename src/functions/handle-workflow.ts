@@ -25,7 +25,7 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
 
   const { data, error } = await supabase
     .from("workflow_triggers")
-    .select("*, workflow(nodes, name)")
+    .select("*, workflow(nodes, name, publish)")
     .eq("event_type", event.subscription.type)
     .or(eventFilter)
     .single();
@@ -44,6 +44,9 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
   }
 
   if (!data || !data.workflow) return;
+
+  // @ts-ignore
+  if(data.workflow.publish as boolean === false) return
 
   // @ts-ignore
   let workflow: EditorNodeType[] = JSON.parse(data.workflow.nodes as string);
@@ -76,7 +79,7 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
         responseData[action.id] = response;
       }
     } catch (error: any) {
-      console.log(error);
+      console.log(error.response.data);
 
       await twitchChat.sendMessage({
         broadcaster_id: event.event.broadcaster_user_id,

@@ -55,6 +55,8 @@ export class twitch {
         `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
+      // console.log(res)
+
       await supabase
         .from("twitch_integration")
         .update({ access_token: res.data.access_token, refresh_token: res.data.refresh_token })
