@@ -2,15 +2,11 @@ import { twitchChat } from "@/classes/twitch/twitch-chat";
 import checkVariable from "@/functions/check-variable";
 import { replaceWords } from "@/functions/replace-variables";
 import type { EventSubNotificationPayload } from "@/types/eventsub";
-import type { Metadata } from "@/types/workflow";
+import type { ActionsParams, Metadata } from "@/types/workflow";
 
-interface sendChatMessageParams {
-  metaData?: Metadata
-  prevResponses?: Record<string, any>;
-  eventDetails: EventSubNotificationPayload
-}
 
-export default async function sendChatMessage({ metaData, prevResponses, eventDetails }: sendChatMessageParams): Promise<void> {
+
+export default async function sendChatMessage({ metaData, prevResponses, eventDetails, broadcaster_id }: ActionsParams): Promise<void> {
   if (!metaData) {
     console.error("No metadata provided for send_chat_message action");
     return;
@@ -27,8 +23,8 @@ export default async function sendChatMessage({ metaData, prevResponses, eventDe
 
 
   await twitchChat.sendMessage({
-    broadcaster_id: eventDetails.event.broadcaster_user_id,
-    sender_id: eventDetails.event.broadcaster_user_id,
+    broadcaster_id: broadcaster_id,
+    sender_id: broadcaster_id,
     message: new_message,
   });
   return;

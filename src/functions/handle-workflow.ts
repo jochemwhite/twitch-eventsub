@@ -21,6 +21,8 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     event_id = event.event.reward.id;
   }
 
+  const broadcaster_id: string = event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id
+
   const eventFilter = event_id ? `event_id.eq.${event_id}` : "event_id.is.null";
 
   const { data, error } = await supabase
@@ -74,6 +76,7 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
         eventDetails: event,
         metaData: action.metaData,
         prevResponses: responseData,
+        broadcaster_id
       });
       if (response) {
         responseData[action.id] = response;
@@ -82,10 +85,10 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
       console.log(error.response.data);
 
       await twitchChat.sendMessage({
-        broadcaster_id: event.event.broadcaster_user_id,
+        broadcaster_id: event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id,
         // @ts-ignore
         message: `An error occurred while processing the workflow: ${data.workflow.name} - turning off the workflow`,
-        sender_id: event.event.broadcaster_user_id,
+        sender_id: event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id,
       });
     }
 

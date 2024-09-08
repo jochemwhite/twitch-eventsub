@@ -1,20 +1,23 @@
 import { CommandDatabase } from "@/classes/supabase/database-commands";
-import { ChannelPointsAPI } from "@/classes/twitch/twitch-channelpoints";
 import { twitchChat } from "@/classes/twitch/twitch-chat";
 import checkCommandPermission from "@/functions/chat/check-command-permission";
-import checkVariable from "@/functions/check-variable";
 import type { UserLevel } from "@/types/database";
 import type { ChatMessageEvent } from "@/types/eventsub";
 import { handleVariable } from "./handle-variable";
+import checkVariable from "./check-variable";
 
 export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
   const { chatter_user_name, broadcaster_user_name, message, message_id, broadcaster_user_id, chatter_user_id, chatter_user_login } = chatMessage;
 
+  const parsedMessage: string[] = message.text.split(" ");
+
+
+    console.log(`[${broadcaster_user_name}] ${chatter_user_name}: ${parsedMessage}`);
+  
+
   // get all the channelpoints
-  const channelpoints = await ChannelPointsAPI.getCustomRewards(+broadcaster_user_id);
 
   // parse the message
-  const parsedMessage: string[] = message.text.split(" ");
   const command = parsedMessage[0].toLowerCase();
   const args = parsedMessage.slice(1);
   // find the command
@@ -65,7 +68,10 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
       })
     );
 
+
     messageToSend = newArray.join(" ");
+
+    console.log(messageToSend)
 
     if (messageToSend === "") return;
 

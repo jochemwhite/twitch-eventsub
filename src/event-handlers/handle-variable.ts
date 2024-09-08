@@ -1,6 +1,6 @@
 import { TwitchChannel } from "@/classes/twitch/twitch-channel";
 import { supabase } from "@/lib/supabase";
-const variableRegex = /\${(.*?)}/g;
+const variableRegex = /\{(.*?)}/g;
 
 interface Props {
   varable: string;
@@ -13,6 +13,8 @@ interface Props {
 
 export async function handleVariable({ channel, channelID, chatter_name, chatter_id, varable, user_id }: Props) {
   const intergartion = varable.replace(variableRegex, "$1").split(".");
+
+  console.log(intergartion)
 
   let catagory = intergartion[0];
   let _varable = intergartion[1];

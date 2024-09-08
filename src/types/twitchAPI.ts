@@ -197,7 +197,7 @@ interface Transport {
 
 export interface GetEventSubSubscriptionsRequest {
   status?: SubscriptionStatus;
-  type: EventSubTopics;
+  type?: EventSubTopics;
   user_id?: string;
   after?: string;
 }
@@ -221,8 +221,8 @@ interface Shard {
 
 export interface getConduitShardsRequest {
   conduit_id: string;
-  status: string;
-  after: string;
+  status?: string;
+  after?: string;
 }
 
 interface ConduitInfo {

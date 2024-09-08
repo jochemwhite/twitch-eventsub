@@ -1,8 +1,9 @@
 import { sendDiscordMessage } from "@/axios/discord-webhook";
 import { supabase } from "@/lib/supabase";
 import type { ChatMessageEvent, EventSubNotification, EventSubNotificationPayload } from "@/types/eventsub";
-import { EventsubAPI } from "./twitch-eventsub";
 import HandleWorkflow from "@/functions/handle-workflow";
+import { EventsubAPI } from "./twitch/twitch-eventsub";
+import { HandleChatMessage } from "@/event-handlers/channel-chat-message";
 
 type CloseCodeMap = {
   [code: number]: string;
@@ -55,7 +56,9 @@ class EventSubSocket {
     url = url ? url : this.mainUrl;
 
     console.debug(`Connecting to ${url}`);
-    this.eventsub = new WebSocket(url);
+    this.eventsub = new WebSocket(url, {
+      
+    });
 
     this.eventsub.onopen = () => {
       this.backoff = 0;
@@ -108,10 +111,9 @@ class EventSubSocket {
           const { session } = payload;
           const { id, keepalive_timeout_seconds } = session;
 
+          console.log(session)
+
           console.debug(`${this.counter} This is Socket ID ${id}`);
-          // if (this.eventsub) {
-          //   this.eventsub.url = id;
-          // }
 
           console.debug(`${this.counter} This socket declared silence as ${keepalive_timeout_seconds} seconds`);
 
@@ -138,13 +140,13 @@ class EventSubSocket {
 
         case "notification":
           const { subscription } = payload;
-          const { type } = subscription;
+          const { type, condition } = subscription;
 
-          // if (type !== "channel.chat.message") {
-          //   console.debug(`${this.eventsub?.url}/${this.counter} Recv notification ${type}`);
-          // }
+          if (type !== "channel.chat.message") {
+            console.debug(`[${condition.broadcaster_user_id}]  event notification ${type}`);
+          }
 
-          // console.debug(payload.event);
+          // console.debug(type);
 
           this.dispatchEvent(payload);
 
@@ -214,6 +216,11 @@ class EventSubSocket {
   }
 
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
+    if (event.subscription.type === "channel.chat.message") {
+      // 
+      await HandleChatMessage(event.event as ChatMessageEvent);
+    }
+
     await HandleWorkflow({ event });
   }
 

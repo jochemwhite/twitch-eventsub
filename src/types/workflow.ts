@@ -67,4 +67,5 @@ export type ActionsParams = {
   eventDetails: EventSubNotificationPayload;
   metaData?: Metadata;
   prevResponses?: Metadata;
+  broadcaster_id: string
 };

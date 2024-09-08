@@ -1,4 +1,4 @@
-import { TwitchAPP } from "../axios/twitchApp";
+import { TwitchAPP } from "../../axios/twitchApp";
 import type {
   CreateEventSubSubscriptionRequest,
   CreateEventSubSubscriptionResponse,
@@ -14,8 +14,8 @@ import type {
   getConduitShardsRequest,
   getConduitShardsResponse,
   getConduitsResponse,
-} from "../types/twitchAPI";
-import { twitch } from "./twitch";
+} from "../../types/twitchAPI";
+import { twitch } from "../twitch";
 
 class TwitchEventSub extends twitch {
   constructor() {
@@ -90,7 +90,8 @@ class TwitchEventSub extends twitch {
 
   // update shards
   async updateConduitShards({ conduit_id, shards }: UpdateConduitShardsRequest): Promise<UpdateShardResponse> {
-    console.log(conduit_id, shards);
+
+    console.log(shards)
 
     try {
       const res = await TwitchAPP.patch(`/eventsub/conduits/shards`, {
@@ -98,7 +99,6 @@ class TwitchEventSub extends twitch {
         shards,
       });
 
-      // console.log(res.data);
       return res.data;
     } catch (error) {
       console.log(error);
@@ -142,12 +142,12 @@ class TwitchEventSub extends twitch {
     status,
     type,
     user_id,
-  }: GetEventSubSubscriptionsRequest): Promise<GetEventSubSubscriptionsResponse> {
+  }: GetEventSubSubscriptionsRequest): Promise<GetEventSubSubscriptionsResponse[]> {
     try {
-      const response = await TwitchAPP.get<GetEventSubSubscriptionsResponse>("/eventsub/subscriptions", {
+      const response = await TwitchAPP.get("/eventsub/subscriptions", {
         params: { status, type: type, user_id: user_id, after },
       });
-      return response.data;
+      return response.data.data
     } catch (error) {
       console.error("Error fetching EventSub subscriptions:", error);
       throw error;
