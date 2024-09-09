@@ -5,14 +5,13 @@ import type { ActionsParams, Metadata } from "@/types/workflow";
 
 
 
-export default async function updateCustomReward({ metaData, prevResponses, eventDetails }: ActionsParams): Promise<unknown> {
-  const { event } = eventDetails;
+export default async function updateCustomReward({ metaData, broadcaster_id }: ActionsParams): Promise<unknown> {
   if (!metaData) {
     console.error("No metadata provided for custom_reward_update action");
     return;
   }
 
-  const old_channelpoint = await ChannelPointsAPI.getCustomRewardById(event.broadcaster_user_id, metaData.reward_id);
+  const old_channelpoint = await ChannelPointsAPI.getCustomRewardById(+broadcaster_id, metaData.reward_id);
 
   if (!old_channelpoint) {
     console.error("Could not find the custom reward to update");
@@ -36,5 +35,5 @@ export default async function updateCustomReward({ metaData, prevResponses, even
     title: old_channelpoint.title,
     cost: new_cost,
   };
-  return await ChannelPointsAPI.updateCustomReward(event.broadcaster_user_id, metaData.reward_id, new_reward);
+  return await ChannelPointsAPI.updateCustomReward(+broadcaster_id, metaData.reward_id, new_reward);
 }

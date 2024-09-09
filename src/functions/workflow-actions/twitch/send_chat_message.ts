@@ -6,7 +6,7 @@ import type { ActionsParams, Metadata } from "@/types/workflow";
 
 
 
-export default async function sendChatMessage({ metaData, prevResponses, eventDetails, broadcaster_id }: ActionsParams): Promise<void> {
+export default async function sendChatMessage({ metaData, prevResponses, broadcaster_id }: ActionsParams): Promise<void> {
   if (!metaData) {
     console.error("No metadata provided for send_chat_message action");
     return;

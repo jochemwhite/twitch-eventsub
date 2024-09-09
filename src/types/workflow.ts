@@ -3,8 +3,8 @@ import type { EventSubNotificationPayload } from "./eventsub";
 type TwitchTriggersTypes = "channel.channel_points_custom_reward_redemption.add";
 type TwitchActionsTypes = "custom_reward_update" | "send_chat_message";
 
-type Actions = TwitchActionsTypes 
-type Triggers = TwitchTriggersTypes 
+type Actions = TwitchActionsTypes;
+type Triggers = TwitchTriggersTypes;
 
 type NodeTypes = "Action" | "Trigger";
 
@@ -36,7 +36,6 @@ export type EditorActions =
   | { type: "UPDATE_METADATA"; payload: { id: string; metadata: Metadata } }
   | { type: "UPDATE_TRIGGER"; payload: { id: string; event_id: string } };
 
-
 export type EditorCanvasDefaultCardType = {
   [provider: string]: {
     Actions: Action[];
@@ -64,8 +63,13 @@ export type Action = {
 };
 
 export type ActionsParams = {
-  eventDetails: EventSubNotificationPayload;
   metaData?: Metadata;
-  prevResponses?: Metadata;
-  broadcaster_id: string
+  prevResponses: prevResponses;
+  broadcaster_id: string;
 };
+
+export interface prevResponses {
+  [uuid: string]: {
+    [key: string]: string; // Adjust if values are of different types
+  };
+}

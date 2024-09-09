@@ -212,13 +212,8 @@ class TwitchChat {
 
   // send Message
   async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse> {
-    try {
-      const res = await TwitchAPP.post(`/chat/messages`, message);
-      return res.data;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    const res = await TwitchAPP.post(`/chat/messages`, message);
+    return res.data;
   }
 
   // Get User Chat Color

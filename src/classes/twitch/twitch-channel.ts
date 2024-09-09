@@ -78,6 +78,17 @@ class twitchChannel extends twitch {
     }
   }
 
+  // add vip
+  async add_vip(broadcaster_id: string, user_id: string) {
+    await TwitchAPI.post("/channels/vips", null, {
+      params: {
+        broadcaster_id,
+        user_id,
+      },
+      broadcasterID: +broadcaster_id,
+    });
+  }
+
   // check if a channel is live
   async getStream(broadcaster_id: string, user_id: string) {
     try {

@@ -4,7 +4,7 @@ import { replaceWords } from "@/functions/replace-variables";
 import type { ActionsParams } from "@/types/workflow";
 
 
-export default async function sendChatAnnouncement({ metaData, prevResponses, eventDetails }: ActionsParams): Promise<void> {
+export default async function sendChatAnnouncement({ metaData, prevResponses, broadcaster_id }: ActionsParams): Promise<void> {
   if (!metaData) {
     console.error("No metadata provided for send_chat_message action");
     return;
@@ -20,7 +20,7 @@ export default async function sendChatAnnouncement({ metaData, prevResponses, ev
   const new_message = new_message_array.join(" ");
 
 
-  await twitchChat.sendChatAnnouncement(eventDetails.event.broadcaster_user_id, {
+  await twitchChat.sendChatAnnouncement(broadcaster_id, {
     message: new_message,
     color: "primary"
   });

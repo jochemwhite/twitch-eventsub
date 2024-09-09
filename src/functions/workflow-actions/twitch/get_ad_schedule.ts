@@ -1,8 +1,8 @@
 import { TwitchChannel } from "@/classes/twitch/twitch-channel";
 import type { ActionsParams } from "@/types/workflow";
 
-export default async function get_ad_schedule({ eventDetails }: ActionsParams) {
-  const res = await TwitchChannel.get_ad_schedule(eventDetails.event.broadcaster_user_id);
+export default async function get_ad_schedule({ broadcaster_id }: ActionsParams) {
+  const res = await TwitchChannel.get_ad_schedule(broadcaster_id);
 
   const obj = {
     ...res.data[0],

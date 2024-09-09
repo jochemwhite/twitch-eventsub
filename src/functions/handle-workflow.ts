@@ -1,18 +1,14 @@
 import { twitchChat } from "@/classes/twitch/twitch-chat";
 import { supabase } from "@/lib/supabase";
 import type { EventSubNotificationPayload } from "@/types/eventsub";
-import type { Action, Metadata } from "@/types/workflow";
+import type { Action, EditorNodeType, Metadata } from "@/types/workflow";
 import WorkflowActions from "./handle-workflow-actions";
+import { WorkflowError } from "@/classes/workflow-error";
 
 interface Event {
   event: EventSubNotificationPayload;
 }
 
-// Example of workflow type
-interface Workflow {
-  type: string;
-  data: Action;
-}
 
 export default async function HandleWorkflow({ event }: Event): Promise<void> {
   let event_id: string | null = null;
@@ -21,16 +17,15 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     event_id = event.event.reward.id;
   }
 
-  const broadcaster_id: string = event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id
+  const broadcaster_id: string = event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id;
 
   const eventFilter = event_id ? `event_id.eq.${event_id}` : "event_id.is.null";
 
   const { data, error } = await supabase
     .from("workflow_triggers")
-    .select("*, workflow(nodes, name, publish)")
+    .select("*, workflow(nodes, name, publish, id)")
     .eq("event_type", event.subscription.type)
-    .or(eventFilter)
-    .single();
+    .or(eventFilter);
 
   // TODO: Handle the same triggers with different workflows
   // REF: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
@@ -45,21 +40,36 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     return;
   }
 
-  if (!data || !data.workflow) return;
+  if (!data || data.length === 0) return;
 
-  // @ts-ignore
-  if(data.workflow.publish as boolean === false) return
+  await Promise.allSettled(
+    data.map(async (item) => {
+      // @ts-ignore
+      if (!item.workflow.publish) return;
 
-  // @ts-ignore
-  let workflow: EditorNodeType[] = JSON.parse(data.workflow.nodes as string);
+      // @ts-ignore
+      let nodes: EditorNodeType[] = JSON.parse(item.workflow.nodes as string);
+      // console.log(nodes)
+
+      // @ts-ignore
+      return RunWorkflow(nodes, broadcaster_id, event.event, item.workflow.id, item.workflow.name);
+    })
+  );
+
+  // console.log(workflow_results);
+}
+
+async function RunWorkflow(nodes: EditorNodeType[], broadcaster_id: string, eventDetails: [key: string], workflow_id: string, workflow_name: string) {
+  console.log("workflow id", workflow_id);
+
   let responseData: Metadata = {};
 
-  const trigger_id = workflow[0].data.id;
+  const trigger_id = nodes[0].data.id;
 
-  responseData[trigger_id] = event.event;
+  responseData[trigger_id] = eventDetails;
 
   // remove everything that in the node except the data object
-  const actions: Action[] = workflow.filter((node) => node.type !== "Trigger").map((node) => node.data as Action);
+  const actions: Action[] = nodes.filter((node) => node.type !== "Trigger").map((node) => node.data as Action);
 
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
@@ -73,25 +83,47 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
 
     try {
       const response = await handler({
-        eventDetails: event,
         metaData: action.metaData,
         prevResponses: responseData,
-        broadcaster_id
+        broadcaster_id,
       });
       if (response) {
         responseData[action.id] = response;
       }
     } catch (error: any) {
-      console.log(error.response.data);
-
-      await twitchChat.sendMessage({
-        broadcaster_id: event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id,
-        // @ts-ignore
-        message: `An error occurred while processing the workflow: ${data.workflow.name} - turning off the workflow`,
-        sender_id: event.event.broadcaster_user_id ?? event.event.to_broadcaster_user_id,
-      });
+      if (error instanceof WorkflowError) {
+        if (!error.shouldTurnOffWorkflow) break;
+        else {
+          await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
+          break;
+        }
+      } else {
+        await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
+        break;
+      }
     }
 
     continue;
   }
+}
+
+async function HandleWorkFlowError(broadcaster_id: string, workflow_id: string, workflow_name: string) {
+  console.log("turning off workflow");
+
+  try {
+    await twitchChat.sendMessage({
+      broadcaster_id: broadcaster_id,
+      message: `An error occurred while processing the workflow: ${workflow_name} - turning off the workflow`,
+      sender_id: broadcaster_id,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  const { data, error } = await supabase
+    .from("workflows")
+    .update({
+      publish: false,
+    })
+    .eq("id", workflow_id);
 }

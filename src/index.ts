@@ -9,14 +9,14 @@ new EventSubSocket({
 
 
 
-async function getShards(){
-  const res = await EventsubAPI.getConduitShards({
-    conduit_id: "d76b9935-da70-4ccb-87cd-e9e899986cc8"
-  })
- res.data.map((res) => {
-  console.log(res)
- })
-}
+// async function getShards(){
+//   const res = await EventsubAPI.getConduitShards({
+//     conduit_id: "d76b9935-da70-4ccb-87cd-e9e899986cc8"
+//   })
+//  res.data.map((ress) => {
+//   console.log(ress)
+//  })
+// }
 
 
-// getShards()
+// // getShards()
