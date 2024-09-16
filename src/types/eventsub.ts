@@ -108,6 +108,7 @@ type NotificationMessagePayload = {
     transport: {
       method: string;
       session_id: string;
+      conduit_id: string
     };
     created_at: string;
   };
@@ -129,6 +130,7 @@ type RevocationMessagePayload = {
     transport: {
       method: string;
       session_id: string;
+      conduit_id: string
     };
     created_at: string;
   };
@@ -179,6 +181,7 @@ export type EventSubNotification = {
       transport: {
         method: string;
         session_id: string;
+        conduit_id: string
       };
       created_at: string;
     };

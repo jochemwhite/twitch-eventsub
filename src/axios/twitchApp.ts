@@ -1,4 +1,5 @@
 import axios from "axios";
+import { env } from "bun";
 
 // TODO add the app Token to the database
 
@@ -6,8 +7,8 @@ const TwitchAPP = axios.create({
   baseURL: "https://api.twitch.tv/helix",
   headers: {
     Accept: "application/json",
-    "Client-ID": process.env.TWITCH_CLIENT_ID,
-    Authorization: `Bearer ${process.env.TWITCH_APP_TOKEN}`,
+    "Client-ID": env.TWITCH_CLIENT_ID,
+    Authorization: `Bearer ${env.TWITCH_APP_TOKEN}`,
   },
 });
 

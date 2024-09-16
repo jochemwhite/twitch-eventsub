@@ -9,7 +9,6 @@ interface Event {
   event: EventSubNotificationPayload;
 }
 
-
 export default async function HandleWorkflow({ event }: Event): Promise<void> {
   let event_id: string | null = null;
 
@@ -26,9 +25,6 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     .select("*, workflow(nodes, name, publish, id)")
     .eq("event_type", event.subscription.type)
     .or(eventFilter);
-
-  // TODO: Handle the same triggers with different workflows
-  // REF: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -59,8 +55,16 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
   // console.log(workflow_results);
 }
 
-async function RunWorkflow(nodes: EditorNodeType[], broadcaster_id: string, eventDetails: [key: string], workflow_id: string, workflow_name: string) {
+export async function RunWorkflow(
+  nodes: EditorNodeType[],
+  broadcaster_id: string,
+  eventDetails: [key: string],
+  workflow_id: string,
+  workflow_name: string
+) {
   console.log("workflow id", workflow_id);
+
+  let node_errors: Metadata = {};
 
   let responseData: Metadata = {};
 
@@ -92,6 +96,12 @@ async function RunWorkflow(nodes: EditorNodeType[], broadcaster_id: string, even
       }
     } catch (error: any) {
       if (error instanceof WorkflowError) {
+        node_errors[action.id] = {
+          error: error.message,
+          shouldTurnOffWorkflow: error.shouldTurnOffWorkflow,
+          originalError: error.originalError,
+        };
+
         if (!error.shouldTurnOffWorkflow) break;
         else {
           await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
@@ -99,12 +109,19 @@ async function RunWorkflow(nodes: EditorNodeType[], broadcaster_id: string, even
         }
       } else {
         await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
+        node_errors[action.id] = {
+          error: error.message,
+          shouldTurnOffWorkflow: true,
+          originalError: error,
+        };
         break;
       }
     }
 
     continue;
   }
+
+  return { responseData, node_errors };
 }
 
 async function HandleWorkFlowError(broadcaster_id: string, workflow_id: string, workflow_name: string) {

@@ -1,12 +1,13 @@
 import axios from "axios";
 import twitchAPI from "../classes/twitch";
 import { supabase } from "@/lib/supabase";
+import { env } from "@/lib/env";
 
 const TwitchAPI = axios.create({
   baseURL: "https://api.twitch.tv/helix",
   headers: {
     Accept: "application/json",
-    "Client-ID": process.env.TWITCH_CLIENT_ID,
+    "Client-ID": env.TWITCH_CLIENT_ID,
   },
 });
 

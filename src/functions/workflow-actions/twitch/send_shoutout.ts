@@ -3,7 +3,7 @@ import { WorkflowError } from "@/classes/workflow-error";
 import getValueByUUID from "@/functions/get_value_by_uuid";
 import type { ActionsParams } from "@/types/workflow";
 
-export default async function send_shoutout({metaData, broadcaster_id, prevResponses}: ActionsParams){
+export default async function send_shoutout({ metaData, broadcaster_id, prevResponses }: ActionsParams) {
   if (!metaData) throw new Error("no meta data found");
 
   // const user_id = replaceWords(metaData.user_id, prevResponses)
@@ -19,23 +19,21 @@ export default async function send_shoutout({metaData, broadcaster_id, prevRespo
   try {
     await twitchChat.sendShoutout(broadcaster_id, user_id, broadcaster_id);
   } catch (error: any) {
-    if (error.response.data.status === 429 ) {
-      twitchChat.sendMessage({
-        broadcaster_id,
-        sender_id: broadcaster_id,
-        message: "The broadcaster exceeded the number of Shoutouts they may send within a given window. See the endpoint's Rate Limits.",
-      });
-
-      throw new WorkflowError("The broadcaster exceeded the number of Shoutouts they may send within a given window. See the endpoint's Rate Limits.", false)
-
-    }
-    else{
-      throw new WorkflowError("Failed to send a shoutout", true, error)
+    if (error.response.data.status === 429) {
+      throw new WorkflowError(
+        "The broadcaster exceeded the number of Shoutouts they may send within a given window. See the endpoint's Rate Limits.",
+        false
+      );
+    } else if (error.response.data.status === 400) {
+      if (error.response.data.message === "The broadcaster may not give themselves a Shoutout.") {
+        throw new WorkflowError("The broadcaster may not give themselves a Shoutout.", false);
+      } else if (error.response.data.message === "The broadcaster is not streaming live or does not have one or more viewers.") {
+        throw new WorkflowError("The broadcaster is not streaming live or does not have one or more viewers.", false);
+      } else {
+        throw new WorkflowError(error.response.data.message, true);
+      }
+    } else {
+      throw new WorkflowError("Failed to send a shoutout", true, error);
     }
   }
-
-
-
-
-
 }

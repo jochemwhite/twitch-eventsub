@@ -1,3 +1,4 @@
+import { env } from "@/lib/env";
 import { TwitchAPP } from "../../axios/twitchApp";
 import type {
   CreateEventSubSubscriptionRequest,
@@ -64,8 +65,8 @@ class TwitchEventSub extends twitch {
     try {
       const res = await TwitchAPP.delete(`/eventsub/conduits?id=${id}`, {
         headers: {
-          "Client-ID": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${process.env.TWITCH_APP_TOKEN}`,
+          "Client-ID": env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${env.TWITCH_CLIENT_SECRET}`,
         },
       });
       return res.data;

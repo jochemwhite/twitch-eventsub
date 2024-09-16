@@ -10,10 +10,11 @@ import type {
   getChattersResponse,
 } from "../types/twitchAPI";
 import { supabase } from "@/lib/supabase";
+import { env } from "@/lib/env";
 
 export class twitch {
-  protected clientID = process.env.TWITCH_CLIENT_ID;
-  protected clientSecret = process.env.TWITCH_CLIENT_SECRET;
+  protected clientID = env.TWITCH_CLIENT_ID;
+  protected clientSecret = env.TWITCH_CLIENT_SECRET;
   protected broadcasterID?: number;
 
   constructor() {}
@@ -52,7 +53,7 @@ export class twitch {
   async RefreshToken(refreshToken: string, channelID: number) {
     try {
       const res = await axios.post(
-        `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
+        `https://id.twitch.tv/oauth2/token?client_id=${env.TWITCH_CLIENT_ID}&client_secret=${env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
       // console.log(res)

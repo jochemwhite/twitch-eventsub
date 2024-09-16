@@ -13,12 +13,13 @@ import type {
   updateChatSettingsRequest,
 } from "@/types/twitchAPI";
 import { TwitchAPP } from "@/axios/twitchApp";
+import { env } from "@/lib/env";
 
 class TwitchChat {
   bot_id: number;
 
   constructor() {
-    this.bot_id = +process.env.TWITCH_BOT_ID!;
+    this.bot_id = Number(env.TWITCH_BOT_ID);
   }
 
   //get all the chatters in a chat room
@@ -194,20 +195,15 @@ class TwitchChat {
 
   // send shoutout
   async sendShoutout(from_broadcaster_id: string, to_broadcaster_id: string, moderator_id: string): Promise<void> {
-    try {
-      await TwitchAPI.post(`/chat/shoutouts`, null, {
-        params: {
-          from_broadcaster_id,
-          to_broadcaster_id,
-          moderator_id,
-        },
-        // get the accessToken from the moderator
-        broadcasterID: +moderator_id,
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    await TwitchAPI.post(`/chat/shoutouts`, null, {
+      params: {
+        from_broadcaster_id,
+        to_broadcaster_id,
+        moderator_id,
+      },
+      // get the accessToken from the moderator
+      broadcasterID: +moderator_id,
+    });
   }
 
   // send Message

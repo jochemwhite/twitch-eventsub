@@ -4,7 +4,8 @@ import type { ChatMessageEvent, EventSubNotification, EventSubNotificationPayloa
 import HandleWorkflow from "@/functions/handle-workflow";
 import { EventsubAPI } from "./twitch/twitch-eventsub";
 import { HandleChatMessage } from "@/event-handlers/channel-chat-message";
-
+import { env } from "@/lib/env";
+import { twitchChat } from "./twitch/twitch-chat";
 type CloseCodeMap = {
   [code: number]: string;
 };
@@ -36,6 +37,8 @@ class EventSubSocket {
   private silenceHandler: any;
   private silenceTime: number = 10;
 
+  private prod: boolean = true;
+
   private silenceReconnect: boolean;
   private disableAutoReconnect: boolean;
 
@@ -56,9 +59,7 @@ class EventSubSocket {
     url = url ? url : this.mainUrl;
 
     console.debug(`Connecting to ${url}`);
-    this.eventsub = new WebSocket(url, {
-      
-    });
+    this.eventsub = new WebSocket(url, {});
 
     this.eventsub.onopen = () => {
       this.backoff = 0;
@@ -111,7 +112,7 @@ class EventSubSocket {
           const { session } = payload;
           const { id, keepalive_timeout_seconds } = session;
 
-          console.log(session)
+          console.log(session);
 
           console.debug(`${this.counter} This is Socket ID ${id}`);
 
@@ -122,10 +123,10 @@ class EventSubSocket {
           } else {
             console.debug(`${this.counter} Sending shards to Twitch`);
             await EventsubAPI.updateConduitShards({
-              conduit_id: "d76b9935-da70-4ccb-87cd-e9e899986cc8",
+              conduit_id: env.CONDUIT_ID,
               shards: [
                 {
-                  id: "0",
+                  id: env.SHARD_ID,
                   transport: {
                     method: "websocket",
                     session_id: id,
@@ -139,12 +140,37 @@ class EventSubSocket {
           break;
 
         case "notification":
-          const { subscription } = payload;
+          const { subscription, event } = payload;
           const { type, condition } = subscription;
 
-          if (type !== "channel.chat.message") {
-            console.debug(`[${condition.broadcaster_user_id}]  event notification ${type}`);
+          if (
+            type === "channel.chat.message" &&
+            event.broadcaster_user_id === "122604941" &&
+            subscription.transport.conduit_id === "d76b9935-da70-4ccb-87cd-e9e899986cc8"
+          ) {
+            if (event.message.text === "!prod") {
+              this.prod = true;
+              twitchChat.sendMessage({
+                broadcaster_id: "122604941",
+                message: "Switched to production server",
+                sender_id: "122604941",
+              });
+            } else if (event.message.text === "!dev") {
+              this.prod = false;
+              twitchChat.sendMessage({
+                broadcaster_id: "122604941",
+                message: "Switched to dev server",
+                sender_id: "122604941",
+              });
+            }
           }
+
+          if (
+            this.prod === false &&
+            condition.broadcaster_user_id === "122604941" &&
+            subscription.transport.conduit_id === "d76b9935-da70-4ccb-87cd-e9e899986cc8"
+          )
+            return;
 
           // console.debug(type);
 
@@ -217,7 +243,7 @@ class EventSubSocket {
 
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
     if (event.subscription.type === "channel.chat.message") {
-      // 
+      //
       await HandleChatMessage(event.event as ChatMessageEvent);
     }
 
