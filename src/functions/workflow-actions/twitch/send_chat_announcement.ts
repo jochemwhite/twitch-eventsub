@@ -13,16 +13,14 @@ export default async function sendChatAnnouncement({ metaData, prevResponses, br
   // check for variables in the message
   const messageArray = checkVariable(metaData.message);
 
-  if (!prevResponses) {
-    prevResponses = {};
-  }
+ 
   const new_message_array = replaceWords(messageArray, prevResponses);
   const new_message = new_message_array.join(" ");
 
 
-  await twitchChat.sendChatAnnouncement(broadcaster_id, {
+  const res = await twitchChat.sendChatAnnouncement(broadcaster_id, {
     message: new_message,
     color: "primary"
   });
-  return;
+  return res
 }

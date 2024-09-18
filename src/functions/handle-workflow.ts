@@ -1,7 +1,7 @@
 import { twitchChat } from "@/classes/twitch/twitch-chat";
 import { supabase } from "@/lib/supabase";
 import type { EventSubNotificationPayload } from "@/types/eventsub";
-import type { Action, EditorNodeType, Metadata } from "@/types/workflow";
+import type { Action, EditorNodeType, Metadata, NodeReponses } from "@/types/workflow";
 import WorkflowActions from "./handle-workflow-actions";
 import { WorkflowError } from "@/classes/workflow-error";
 
@@ -24,7 +24,9 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
     .from("workflow_triggers")
     .select("*, workflow(nodes, name, publish, id)")
     .eq("event_type", event.subscription.type)
+    .eq("broadcaster_id", broadcaster_id)
     .or(eventFilter);
+
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -55,6 +57,12 @@ export default async function HandleWorkflow({ event }: Event): Promise<void> {
   // console.log(workflow_results);
 }
 
+type error = {
+  type: "error" | "warning";
+  node_id: string;
+  message: string;
+};
+
 export async function RunWorkflow(
   nodes: EditorNodeType[],
   broadcaster_id: string,
@@ -62,29 +70,32 @@ export async function RunWorkflow(
   workflow_id: string,
   workflow_name: string
 ) {
-  console.log("workflow id", workflow_id);
-
-  let node_errors: Metadata = {};
-
-  let responseData: Metadata = {};
+  let responseData: NodeReponses = {};
+  let ResponseError: error[] | null = null;
 
   const trigger_id = nodes[0].data.id;
 
-  responseData[trigger_id] = eventDetails;
+  responseData[trigger_id] = {
+    status: "trigger",
+    message: "workflow triggered",
+    data: eventDetails,
+    started_at: new Date().toISOString(),
+  };
 
+  
   // remove everything that in the node except the data object
   const actions: Action[] = nodes.filter((node) => node.type !== "Trigger").map((node) => node.data as Action);
-
+  
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
-
+    
     const handler = WorkflowActions[action.type];
-
+    
     if (!handler) {
       console.error(`Handler not found for ${action.type}`);
       continue;
     }
-
+    
     try {
       const response = await handler({
         metaData: action.metaData,
@@ -92,55 +103,72 @@ export async function RunWorkflow(
         broadcaster_id,
       });
       if (response) {
-        responseData[action.id] = response;
+        responseData[action.id] = {
+          status: "success",
+          message: "Action executed successfully",
+          data: response,
+          started_at: new Date().toISOString(),
+        };
+      } else {
+        responseData[action.id] = {
+          status: "success",
+          message: "Action executed successfully",
+          started_at: new Date().toISOString(),
+        };
       }
     } catch (error: any) {
+      // console.log(error);
       if (error instanceof WorkflowError) {
-        node_errors[action.id] = {
-          error: error.message,
-          shouldTurnOffWorkflow: error.shouldTurnOffWorkflow,
-          originalError: error.originalError,
-        };
-
-        if (!error.shouldTurnOffWorkflow) break;
-        else {
+        responseData[action.id] = {
+            status: error.shouldTurnOffWorkflow ? "error" : "warning",
+            message: error.message,
+            data: error,
+            started_at: new Date().toISOString(),
+          };
+          
+          if (!error.shouldTurnOffWorkflow) ResponseError = [...(ResponseError ?? []), { type: "warning", node_id: action.id, message: error.message }];
+          
+          if (!error.shouldTurnOffWorkflow) continue;
+          else {
+            await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
+            break;
+          }
+        } else {
           await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
+          responseData[action.id] = {
+            message: error.message,
+            status: "error",
+            data: error,
+            started_at: new Date().toISOString(),
+          };
+          ResponseError = [...(ResponseError ?? []), { type: "error", node_id: action.id, message: error.message }];
           break;
         }
-      } else {
-        await HandleWorkFlowError(broadcaster_id, workflow_id, workflow_name);
-        node_errors[action.id] = {
-          error: error.message,
-          shouldTurnOffWorkflow: true,
-          originalError: error,
-        };
-        break;
       }
+      
+      continue;
     }
-
-    continue;
+    
+    return { responseData, ResponseError };
   }
-
-  return { responseData, node_errors };
-}
-
+  
 async function HandleWorkFlowError(broadcaster_id: string, workflow_id: string, workflow_name: string) {
   console.log("turning off workflow");
 
-  try {
-    await twitchChat.sendMessage({
-      broadcaster_id: broadcaster_id,
-      message: `An error occurred while processing the workflow: ${workflow_name} - turning off the workflow`,
-      sender_id: broadcaster_id,
-    });
-  } catch (error) {
-    console.log(error);
-  }
+  // try {
+  //   await twitchChat.sendMessage({
+  //     broadcaster_id: broadcaster_id,
+  //     message: `An error occurred while processing the workflow: ${workflow_name} - turning off the workflow`,
+  //     sender_id: broadcaster_id,
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  // }
 
-  const { data, error } = await supabase
-    .from("workflows")
-    .update({
-      publish: false,
-    })
-    .eq("id", workflow_id);
+  // const { data, error } = await supabase
+  //   .from("workflows")
+  //   .update({
+  //     publish: false,
+  //   })
+  //   .eq("id", workflow_id);
 }

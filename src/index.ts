@@ -5,10 +5,10 @@ import swagger from "@elysiajs/swagger";
 import { WorkflowController } from "./controllers/workflows";
 import twitchAPI from "./classes/twitch";
 
-new EventSubSocket({
-  connect: true,
-  // url: "ws://127.0.0.1:8080/ws",
-});
+// new EventSubSocket({
+//   connect: true,
+//   // url: "ws://127.0.0.1:8080/ws",
+// });
 
 const app = new Elysia()
   .use(swagger())
@@ -18,7 +18,7 @@ const app = new Elysia()
     allowedHeaders: ["Content-Type", "Authorization"]
   }))
   .use(WorkflowController)
-  .listen(8000, () => {
+  .listen(8080, () => {
     console.log("server started on port 8000");
   });
 

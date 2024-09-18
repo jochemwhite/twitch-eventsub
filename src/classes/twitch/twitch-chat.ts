@@ -207,22 +207,22 @@ class TwitchChat {
   }
 
   // send Message
-  async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse> {
-    const res = await TwitchAPP.post(`/chat/messages`, message);
-    return res.data;
+  async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse["data"]["0"]> {
+    const res = await TwitchAPP.post<SendChatMessageResponse>(`/chat/messages`, message);
+    return res.data.data[0];
   }
 
   // Get User Chat Color
   async getUserChatColor(broadcaster_id: string, user_id: string[]): Promise<getUserChatColorResponse> {
     try {
-      const res = await TwitchAPI.get<getUserChatColorResponse>(`/chat/color`, {
+      const res = await TwitchAPI.get<getUserChatColorResponse[]>(`/chat/color`, {
         params: {
           user_id,
         },
         broadcasterID: +broadcaster_id,
       });
 
-      return res.data;
+      return res.data[0];
     } catch (error) {
       console.log(error);
       throw error;

@@ -1,9 +1,10 @@
 import { RunWorkflow } from "@/functions/handle-workflow";
 import { createSupabaseClient } from "@/lib/supabase";
+import { supabaseJWTMiddleware } from "@/middleware/jwt.middleware";
 // import { supabaseJWT } from "@/middleware/jwt.middleware";
 import { Elysia, t } from "elysia";
 
-export const WorkflowController = new Elysia({ prefix: "/workflow" }).post(
+export const WorkflowController = new Elysia({ prefix: "/workflow" }).use(supabaseJWTMiddleware).post(
   "/test",
   async ({ body, headers, set }) => {
     const { authorization } = headers;
@@ -26,18 +27,28 @@ export const WorkflowController = new Elysia({ prefix: "/workflow" }).post(
 
     const workflow_results = await RunWorkflow(JSON.parse(data.nodes), broadcaster_id, JSON.parse(trigger_details), data.id, data.name);
 
+    // create a array of the workflow results and sort on started at
+    const workflow_results_array = Object.entries(workflow_results.responseData)
+      .map(([node_id, value]) => {
+        return { node_id, ...value, started_at: workflow_results.responseData[node_id].started_at };
+      })
+      .sort((a, b) => {
+        return new Date(a.started_at).getTime() - new Date(b.started_at).getTime();
+      });
 
-    // check for errors
-    if (Object.keys(workflow_results.node_errors).length) {
-      set.status = 400
-      return {
-        errors: workflow_results.node_errors,
-        message: "Workflow processed with errors",
-        responses: workflow_results.responseData
-      };
+    if (workflow_results.ResponseError && workflow_results.ResponseError.length > 0) {
+      // check for errors vs warnings
+
+      for (const error of workflow_results.ResponseError) {
+        if (error.type === "error") {
+          return { node_responses: workflow_results_array, message: `workflow failed on ${error.node_id}: ${error.message}` };
+        } else {
+          return { node_responses: workflow_results_array, message: `workflow finshed with warnings check logs` };
+        }
+      }
     }
 
-    return { message: "Workflow processed" };
+    return { node_responses: workflow_results_array, message: "Workflow processed successfully" };
   },
   {
     body: t.Object({

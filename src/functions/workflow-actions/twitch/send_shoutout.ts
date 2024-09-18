@@ -4,13 +4,16 @@ import getValueByUUID from "@/functions/get_value_by_uuid";
 import type { ActionsParams } from "@/types/workflow";
 
 export default async function send_shoutout({ metaData, broadcaster_id, prevResponses }: ActionsParams) {
-  if (!metaData) throw new Error("no meta data found");
+  if (!metaData || !metaData.user_id) throw new WorkflowError("Missing user_id", true);
 
   // const user_id = replaceWords(metaData.user_id, prevResponses)
 
   const split = metaData.user_id.split(":");
   const node_id = split[0];
   const key = split[1];
+
+  // console.log(node_id, key)
+
 
   const user_id = getValueByUUID(prevResponses, node_id, key);
 

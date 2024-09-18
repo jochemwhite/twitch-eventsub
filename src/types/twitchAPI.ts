@@ -413,6 +413,7 @@ export interface SencChatAnnouncementRequest {
   color?: AnnouncementColor;
 }
 
+
 export interface SendChatMessageRequest {
   broadcaster_id: string;
   sender_id: string;
@@ -428,7 +429,7 @@ export interface SendChatMessageResponse {
       code: string;
       message: string;
     };
-  };
+  }[]
 }
 
 

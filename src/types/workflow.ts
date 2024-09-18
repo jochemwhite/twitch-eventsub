@@ -64,12 +64,27 @@ export type Action = {
 
 export type ActionsParams = {
   metaData?: Metadata;
-  prevResponses: prevResponses;
+  prevResponses: NodeReponses;
   broadcaster_id: string;
 };
 
-export interface prevResponses {
+export interface NodeReponses {
   [uuid: string]: {
-    [key: string]: string; // Adjust if values are of different types
+    status: string;
+    message: string;
+    data?: {
+      [key: string]: any;
+    };
+
+    error?: any;
+    started_at: string
   };
 }
+
+// export type NodeReponses = {
+//   [node_id: string]: {
+//     status: "success" | "error" | "warning" | "trigger";
+//     message: string;
+//     data?: Metadata;
+//   };
+// };
