@@ -1,7 +1,6 @@
 import { RunWorkflow } from "@/functions/handle-workflow";
 import { createSupabaseClient } from "@/lib/supabase";
 import { supabaseJWTMiddleware } from "@/middleware/jwt.middleware";
-// import { supabaseJWT } from "@/middleware/jwt.middleware";
 import { Elysia, t } from "elysia";
 
 export const WorkflowController = new Elysia({ prefix: "/workflow" }).use(supabaseJWTMiddleware).post(
