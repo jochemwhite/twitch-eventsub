@@ -5,10 +5,10 @@ import swagger from "@elysiajs/swagger";
 import { WorkflowController } from "./controllers/workflows";
 import twitchAPI from "./classes/twitch";
 
-// new EventSubSocket({
-//   connect: true,
-//   // url: "ws://127.0.0.1:8080/ws",
-// });
+new EventSubSocket({
+  connect: true,
+  // url: "ws://127.0.0.1:8080/ws",
+});
 
 const app = new Elysia()
   .use(swagger())
@@ -23,3 +23,11 @@ const app = new Elysia()
   });
 
 
+
+
+// async function main() {
+//   const res = await twitchAPI.createAppToken();
+//   console.log(res);
+// }
+
+// main();

@@ -244,7 +244,7 @@ class EventSubSocket {
   private async dispatchEvent(event: EventSubNotificationPayload): Promise<void> {
     if (event.subscription.type === "channel.chat.message") {
       //
-      await HandleChatMessage(event.event as ChatMessageEvent);
+     return await HandleChatMessage(event.event as ChatMessageEvent);
     }
 
     await HandleWorkflow({ event });
