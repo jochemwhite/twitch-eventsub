@@ -7,7 +7,10 @@
     "dev": "bun run --watch ./src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.26.2",
+    "tsx": "^4.19.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -18,7 +21,10 @@
     "@supabase/ssr": "^0.3.0",
     "@supabase/supabase-js": "^2.44.3",
     "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.35.1",
     "elysia": "^1.1.12",
+    "pg": "^8.13.0",
     "zod": "^3.23.8"
   }
 }

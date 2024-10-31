@@ -18,6 +18,7 @@ const app = new Elysia()
     allowedHeaders: ["Content-Type", "Authorization"]
   }))
   .use(WorkflowController)
+  app
   .listen(8080, () => {
     console.log("server started on port 8000");
   });
